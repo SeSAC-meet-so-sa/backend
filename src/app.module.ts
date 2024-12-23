@@ -8,7 +8,7 @@ import { BoardModule } from './board/board.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/nest'),
+    MongooseModule.forRoot('mongodb://mongo:27017/nest'),
     UserModule,
     BoardModule,
   ],
