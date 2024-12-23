@@ -67,7 +67,8 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd /home/ubuntu
+          script: |
+            cd /home/ubuntu
             # docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/nestjs-app:latest
             docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.AWS_ECR_REPO_NAME }}:latest
             sudo docker-compose down
