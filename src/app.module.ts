@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { BoardModule } from './board/board.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { S3Module } from './s3/s3.module';
 
 @Module({
   imports: [
@@ -17,10 +18,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    ConfigModule.forRoot({ isGlobal: true }),
     UserModule,
     BoardModule,
     AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService],
