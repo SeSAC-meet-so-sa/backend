@@ -1,32 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as AWS from 'aws-sdk';
+import {
+  S3Client,
+  PutObjectCommand,
+  PutObjectCommandInput,
+} from '@aws-sdk/client-s3';
 
 @Injectable()
 export class S3Service {
-  private s3: AWS.S3;
+  private s3Client: S3Client;
+  private bucketName: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.s3 = new AWS.S3({
-      accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
+    this.s3Client = new S3Client({
+      credentials: {
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
+      },
       region: this.configService.get<string>('AWS_REGION'),
     });
+    this.bucketName = this.configService.get<string>('AWS_BUCKET_NAME');
   }
 
   async uploadFile(file: Express.Multer.File): Promise<string> {
-    const bucketName = this.configService.get<string>('AWS_BUKET_NAME');
-    const key = `${Date.now()}-${file.originalname}`;
+    const key = `uploads/${Date.now()}-${file.originalname}`;
 
-    const params = {
-      Bucket: bucketName,
+    const params: PutObjectCommandInput = {
+      Bucket: this.bucketName,
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
-      ACL: 'public-read', // 공개 URL
+      // ACL: 'public-read', // 공개 URL
     };
 
-    await this.s3.upload(params).promise();
-    return `https://${bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${key}`;
+    try {
+      await this.s3Client.send(new PutObjectCommand(params));
+      return `https://${this.bucketName}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${key}`;
+    } catch (error) {
+      console.error('S3 upload error', error);
+      throw new Error('File upload failed');
+    }
   }
 }
