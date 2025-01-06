@@ -10,7 +10,7 @@ export class Board {
   title: string;
 
   @Prop({ required: true })
-  description: string;
+  content: string;
 
   @Prop({ default: Date.now })
   createdAt: Date;
