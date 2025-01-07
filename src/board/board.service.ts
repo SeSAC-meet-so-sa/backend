@@ -5,48 +5,71 @@ import { Board, BoardDocument } from './schemas/board.schema';
 
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { S3Service } from 'src/s3/s3.service';
 
 @Injectable()
 export class BoardService {
   constructor(
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
+    private readonly s3Service: S3Service,
   ) {}
 
-  async create(createBoardDto: CreateBoardDto): Promise<Board> {
-    const createBoard = new this.boardModel(createBoardDto);
-    const result = await createBoard.save();
-    console.log(result);
-    return result;
+  // async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+  //   const createBoard = new this.boardModel(createBoardDto);
+  //   const result = await createBoard.save();
+  //   console.log(result);
+  //   return result;
+  // }
+
+  async createBoard(createBoardDto: CreateBoardDto) {
+    const { title, content, images, visibility, author } = createBoardDto;
+    const imageUrls = [];
+
+    // S3에 이미지를 업로드해봅시다
+    if (images && images.length > 0) {
+      for (const image of images) {
+        const url = await this.s3Service.uploadFile(image);
+        imageUrls.push(url);
+      }
+    }
+
+    // 새로운 게시물을 생성해봅시다....
+    const newBoard = new this.boardModel({
+      title,
+      content,
+      images: imageUrls,
+      visibility,
+      author,
+    });
+    return newBoard.save();
   }
 
-  async findAll(): Promise<Board[]> {
+  async getBoards() {
     return this.boardModel.find().exec();
   }
 
-  async findOne(id: string): Promise<Board> {
-    const board = await this.boardModel.findById(id).exec();
+  async getBoardById(boardId: string) {
+    const board = await this.boardModel.findById(boardId).exec();
     if (!board) {
-      throw new NotFoundException(`Board #${id} not found`);
+      throw new NotFoundException(`Board #${boardId} not found`);
     }
     return board;
   }
 
-  async update(id: string, updateBoardDto: UpdateBoardDto): Promise<Board> {
-    const updated = await this.boardModel.findByIdAndUpdate(
-      id,
-      updateBoardDto,
-      { new: true },
-    );
+  async updateBoard(boardId: string, updateBoardDto: UpdateBoardDto) {
+    const updated = await this.boardModel
+      .findByIdAndUpdate(boardId, updateBoardDto, { new: true })
+      .exec();
     if (!updated) {
-      throw new NotFoundException(`Board #${id} not found`);
+      throw new NotFoundException(`Board #${boardId} not found`);
     }
     return updated;
   }
 
-  async remove(id: string): Promise<Board> {
-    const deleted = await this.boardModel.findByIdAndDelete(id);
+  async deleteBoard(boardId: string) {
+    const deleted = await this.boardModel.findByIdAndDelete(boardId).exec();
     if (!deleted) {
-      throw new NotFoundException(`Board #${id} not found`);
+      throw new NotFoundException(`Board #${boardId} not found`);
     }
     return deleted;
   }
