@@ -17,7 +17,7 @@ COPY . .
 RUN yarn build
 
 # 7. 실행 명령어 설정
-CMD ["yarn", "start:prod"]
+CMD ["yarn", "start:dev"]
 
 # 8. 애플리케이션 실행에 사용할 포트 노출
 EXPOSE 3000
