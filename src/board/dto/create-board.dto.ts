@@ -2,4 +2,7 @@
 export class CreateBoardDto {
   title: string;
   content: string;
+  images?: Express.Multer.File[];
+  visibility: 'PRIVATE' | 'FRIENDS_ONLY' | 'PUBLIC';
+  author: string;
 }
