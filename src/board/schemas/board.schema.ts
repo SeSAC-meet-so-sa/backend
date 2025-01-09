@@ -27,7 +27,7 @@ export class Board {
   likeCount: number;
 
   @Prop({ default: 0 })
-  bookmarkCount: number;
+  bookmarks: number;
 
   @Prop({ default: 0 })
   viewCount: number;

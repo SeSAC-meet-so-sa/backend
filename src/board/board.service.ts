@@ -53,6 +53,10 @@ export class BoardService {
     if (!board) {
       throw new NotFoundException(`Board #${boardId} not found`);
     }
+
+    // 조회수 증가
+    board.viewCount += 1;
+    await board.save();
     return board;
   }
 
