@@ -10,6 +10,7 @@ import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -19,18 +20,40 @@ export class AuthService {
   ) {}
 
   /**
+   * 유니크한 랜덤 username 생성
+   */
+  private async generateUniqueUsername(): Promise<string> {
+    let username: string;
+    let isUnique = false;
+
+    while (!isUnique) {
+      // 랜덤 문자열 생성 (8자리)
+      username = `user-${uuidv4().slice(0, 8)}`;
+
+      // 중복 여부 확인
+      const existingUser = await this.userModel.findOne({ username });
+      if (!existingUser) {
+        isUnique = true;
+      }
+    }
+
+    return username;
+  }
+  /**
    * 회원가입
-   * @param signupDto - username과 password를 포함
+   * @param signupDto - email과 password를 포함
    * @returns 생성된 사용자 정보
    */
   async signup(SignupDto: SignupDto): Promise<User> {
-    const { username, password } = SignupDto;
+    const { email, password } = SignupDto;
 
     // 중복 사용자 체크
-    const existingUser = await this.userModel.findOne({ username });
+    const existingUser = await this.userModel.findOne({ email });
     if (existingUser) {
-      throw new ConflictException('Username already exists');
+      throw new ConflictException('email already exists');
     }
+    // 유니크한 username 생성
+    const username = await this.generateUniqueUsername();
 
     // Password Hashing
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,6 +61,7 @@ export class AuthService {
     // 사용자 생성
     const newUser = new this.userModel({
       username,
+      email,
       password: hashedPassword,
     });
 
@@ -46,13 +70,13 @@ export class AuthService {
 
   /**
    * 로그인
-   * @param loginDto - username과 password를 포함
+   * @param loginDto - email과 password를 포함
    * @returns JWT 액세스 토큰
    */
   async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
-    const { username, password } = loginDto;
+    const { email, password } = loginDto;
 
-    const user = await this.userModel.findOne({ username });
+    const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -64,7 +88,7 @@ export class AuthService {
     }
 
     // JWT 생성
-    const payload = { username, sub: user._id };
+    const payload = { email, sub: user._id };
     const accessToken = this.jwtService.sign(payload);
     // NOTE : signAsync
     return { accessToken };
