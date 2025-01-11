@@ -17,6 +17,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @ApiOperation({ summary: '회원가입', description: '회원가입' })
+  @ApiResponse({ status: 201, description: '회원가입 성공' })
+  @ApiResponse({
+    status: 400,
+    description: '회원가입 실패: 유효하지 않은 데이터',
+  })
+  @ApiBody({ type: SignupDto })
   async signup(@Body() signupDto: SignupDto) {
     return this.authService.signup(signupDto);
   }
