@@ -23,11 +23,8 @@ export class Board {
   })
   visibility: string;
 
-  @Prop({ default: 0 })
-  likeCount: number;
-
-  @Prop({ default: 0 })
-  bookmarks: number;
+  @Prop({ default: [] })
+  likes: string[];
 
   @Prop({ default: 0 })
   viewCount: number;
