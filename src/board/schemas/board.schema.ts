@@ -26,6 +26,9 @@ export class Board {
   @Prop({ default: [] })
   likes: string[];
 
+  @Prop({ default: [] })
+  bookmarks: string[];
+
   @Prop({ default: 0 })
   viewCount: number;
 

@@ -5,7 +5,7 @@ import { MoodEntry, MoodEntrySchema } from './moodEntry.schema';
 export type UserDocument = User & Document;
 
 @Schema()
-export class User {
+export class User extends Document {
   @Prop({ required: true, unique: true })
   username: string;
 
@@ -27,8 +27,8 @@ export class User {
   @Prop({ default: [] })
   bookmarks: string[];
 
-  @Prop({ type: [MoodEntrySchema], default: [] })
-  moodEntries: Types.Array<MoodEntry>;
+  @Prop({ type: [Object], default: [] })
+  moodEntries: MoodEntry[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

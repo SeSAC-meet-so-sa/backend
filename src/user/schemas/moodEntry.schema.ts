@@ -1,11 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { User } from './user.schema';
-
-export type UserDocument = User & Document;
+import { Document } from 'mongoose';
 
 @Schema()
-export class MoodEntry {
+export class MoodEntry extends Document {
   @Prop({ required: true })
   date: Date;
 
