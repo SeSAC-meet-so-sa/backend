@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateMoodDto } from './dto/create-mood.dto';
 
 @Controller('user')
 export class UserController {
@@ -27,16 +29,65 @@ export class UserController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findById(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @Patch(':id/points')
+  async updatePoints(
+    @Param('id') userId: string,
+    @Body('delta') delta: number, // 요청으로 delta 값을 전달받음
+  ) {
+    return this.userService.updatePoints(userId, delta);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
+  }
+
+  @Get(':id/mood')
+  async findMoodByDate(
+    @Param('id') userId: string,
+    @Query('date') date: string,
+  ) {
+    return this.userService.findMoodByDate(userId, new Date(date));
+  }
+
+  @Post(':id/mood')
+  async addMood(
+    @Param('id') userId: string,
+    @Body() createMoodDto: CreateMoodDto,
+  ) {
+    return this.userService.addOrUpdateMoodEntry(userId, createMoodDto);
+  }
+
+  @Patch(':id/mood')
+  async updateMood(
+    @Param('id') userId: string,
+    @Body() createMoodDto: CreateMoodDto,
+  ) {
+    return this.userService.addOrUpdateMoodEntry(userId, createMoodDto);
+  }
+
+  @Delete(':id/mood')
+  async deleteMood(
+    @Param('id') userId: string,
+    @Body() body: { date: string },
+  ) {
+    return this.userService.deleteMoodEntry(userId, new Date(body.date));
+  }
+
+  @Get(':id/moods')
+  async getMoodsByMonth(
+    @Param('id') userId: string,
+    @Query('year') year: number,
+    @Query('month') month: number,
+  ) {
+    return this.userService.getMoodsByMonth(userId, year, month);
   }
 }
