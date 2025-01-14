@@ -7,6 +7,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { MoodEntry } from './schemas/moodEntry.schema';
 import { CreateMoodDto } from './dto/create-mood.dto';
 import * as bcrypt from 'bcryptjs';
+import { SearchUsersDto } from './dto/search-users.dto';
 
 @Injectable()
 export class UserService {
@@ -284,5 +285,37 @@ export class UserService {
     );
 
     return friends;
+  }
+
+  async searchUsers(query: SearchUsersDto): Promise<User[]> {
+    const filter: any = {};
+
+    //  키워드 검색
+    if (query.keyword) {
+      filter.$or = [
+        { username: { $regex: query.keyword, $options: 'i' } },
+        { email: { $regex: query.keyword, $options: 'i' } },
+        { description: { $regex: query.keyword, $options: 'i' } },
+      ];
+    }
+
+    // 정렬 조건
+    const sort: any = {};
+    if (query.sortBy) {
+      sort[query.sortBy] = query.sortOrder === 'desc' ? -1 : 1;
+    }
+
+    // 페이지네이션
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const skip = (page - 1) * limit;
+
+    // 쿼리 실행
+    return this.userModel
+      .find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 }

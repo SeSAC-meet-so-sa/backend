@@ -16,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateMoodDto } from './dto/create-mood.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
+import { SearchUsersDto } from './dto/search-users.dto';
 
 @Controller('user')
 export class UserController {
@@ -165,5 +166,10 @@ export class UserController {
   @Get(':id/friends')
   async getFriends(@Param('id') userId: string) {
     return this.userService.getFriends(userId);
+  }
+
+  @Get('search')
+  async searchUsers(@Query() query: SearchUsersDto) {
+    return this.userService.searchUsers(query);
   }
 }
