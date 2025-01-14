@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { MoodEntry, MoodEntrySchema } from './moodEntry.schema';
+import { PointHistory } from './pointHistory.schema';
 
 export type UserDocument = User & Document;
 
@@ -32,13 +33,9 @@ export class User extends Document {
 
   @Prop({ type: [Object], default: [] })
   moodEntries: MoodEntry[];
+
+  @Prop({ type: [PointHistory], default: [] })
+  pointHistory: PointHistory[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.pre('save', function (next) {
-  if (!this.username) {
-    this.username = this._id.toString();
-  }
-  next();
-});

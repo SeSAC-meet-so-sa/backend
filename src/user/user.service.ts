@@ -66,17 +66,6 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
-  async updatePoints(userId: string, delta: number): Promise<User | null> {
-    // delta 값을 더하거나 뺌
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $inc: { points: delta } }, // points 필드를 delta만큼 증가 또는 감소
-        { new: true }, // 업데이트된 문서를 반환
-      )
-      .exec();
-  }
-
   async findMoodByDate(userId: string, date: Date): Promise<MoodEntry | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) return null;
@@ -184,5 +173,20 @@ export class UserService {
       .exec();
 
     return { message: 'Password updated successfully' };
+  }
+
+  async updateUserPoints(
+    userId: string,
+    delta: number,
+    description: string,
+  ): Promise<User | null> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.points += delta;
+
+    user.pointHistory.push({ description, points: delta, date: new Date() });
+    return user.save();
   }
 }

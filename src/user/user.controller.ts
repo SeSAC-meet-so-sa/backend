@@ -64,14 +64,6 @@ export class UserController {
     });
   }
 
-  @Patch(':id/points')
-  async updatePoints(
-    @Param('id') userId: string,
-    @Body('delta') delta: number, // 요청으로 delta 값을 전달받음
-  ) {
-    return this.userService.updatePoints(userId, delta);
-  }
-
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
@@ -116,5 +108,14 @@ export class UserController {
     @Query('month') month: number,
   ) {
     return this.userService.getMoodsByMonth(userId, year, month);
+  }
+
+  @Patch(':id/points')
+  async updatePoints(
+    @Param('id') userId: string,
+    @Body() updatePointsDto: { delta: number; description: string },
+  ) {
+    const { delta, description } = updatePointsDto;
+    return this.userService.updateUserPoints(userId, delta, description);
   }
 }
