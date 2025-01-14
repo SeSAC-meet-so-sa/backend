@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Comment, CommentDocument } from './schemas/comment.schema';
+
 @Injectable()
 export class CommentService {
   constructor(
@@ -24,23 +25,40 @@ export class CommentService {
     return newComment.save();
   }
 
-  async getCommentsByBoard(boardId: string) {
+  async getComments(boardId: string) {
     return this.commentModel
       .find({ boardId, parentCommentId: null })
-      .populate('parentCommentId')
-      .exec();
+      .exec()
+      .then((comments) =>
+        comments.map((comment) =>
+          comment.isDeleted
+            ? { ...comment.toObject(), content: '삭제된 댓글입니다' }
+            : comment,
+        ),
+      );
   }
+
   async getReplies(parentCommentId: string) {
     return this.commentModel.find({ parentCommentId }).exec();
   }
+
   async updateComment(commentId: string, content: string) {
     return this.commentModel
       .findByIdAndUpdate(commentId, { content }, { new: true })
       .exec();
   }
+
   async deleteCommentAndReplies(commentId: string) {
-    await this.commentModel.deleteMany({ parentCommentId: commentId }).exec();
-    return this.commentModel.findByIdAndDelete(commentId).exec();
+    const hasReplies = await this.commentModel
+      .exists({ parentCommentId: commentId })
+      .exec();
+
+    if (hasReplies) {
+      return this.commentModel
+        .findByIdAndUpdate(commentId, { isDeleted: true })
+        .exec();
+    } else {
+      return this.commentModel.findByIdAndDelete(commentId).exec();
+    }
   }
-  // NOTE : 댓글 삭제하면 답글도 삭제? 아님 '삭제된 댓글입니다'라고만 띄울까
 }

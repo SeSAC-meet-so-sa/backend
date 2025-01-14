@@ -14,6 +14,9 @@ export class Comment {
 
   @Prop({ required: true, type: String, ref: 'Board' })
   boardId: string; // 게시글 ID
+
+  @Prop({ default: false })
+  isDeleted: boolean; // 삭제 플래그
 }
 
 export type CommentDocument = Comment & Document;

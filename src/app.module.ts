@@ -8,6 +8,7 @@ import { BoardModule } from './board/board.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Module } from './s3/s3.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { S3Module } from './s3/s3.module';
     BoardModule,
     AuthModule,
     S3Module,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
