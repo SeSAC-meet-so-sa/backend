@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { MoodEntry } from './schemas/moodEntry.schema';
 import { CreateMoodDto } from './dto/create-mood.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -35,6 +36,16 @@ export class UserService {
       profileImage?: string;
     },
   ): Promise<Partial<User>> {
+    // Check if the username already exists
+    if (updateData.username) {
+      const existingUser = await this.userModel
+        .findOne({ username: updateData.username })
+        .exec();
+
+      if (existingUser && existingUser._id.toString() !== userId) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
     const updatedUser = await this.userModel
       .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
       .select('username profileImage description')
@@ -53,17 +64,6 @@ export class UserService {
 
   remove(id: string) {
     return `This action removes a #${id} user`;
-  }
-
-  async updatePoints(userId: string, delta: number): Promise<User | null> {
-    // delta 값을 더하거나 뺌
-    return this.userModel
-      .findByIdAndUpdate(
-        userId,
-        { $inc: { points: delta } }, // points 필드를 delta만큼 증가 또는 감소
-        { new: true }, // 업데이트된 문서를 반환
-      )
-      .exec();
   }
 
   async findMoodByDate(userId: string, date: Date): Promise<MoodEntry | null> {
@@ -143,5 +143,50 @@ export class UserService {
         entryDate.getFullYear() == year && entryDate.getMonth() + 1 == month // JavaScript months are 0-indexed
       );
     });
+  }
+
+  async updatePassword(
+    userId: string,
+    updatePasswordDto: { oldPassword: string; newPassword: string },
+  ) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      updatePasswordDto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    if (updatePasswordDto.oldPassword === updatePasswordDto.newPassword) {
+      throw new BadRequestException('Password is the same as current password');
+    }
+
+    const hashedPassword = await bcrypt.hash(updatePasswordDto.newPassword, 10);
+    await this.userModel
+      .findByIdAndUpdate(userId, { password: hashedPassword })
+      .exec();
+
+    return { message: 'Password updated successfully' };
+  }
+
+  async updateUserPoints(
+    userId: string,
+    delta: number,
+    description: string,
+  ): Promise<User | null> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.points += delta;
+
+    user.pointHistory.push({ description, points: delta, date: new Date() });
+    return user.save();
   }
 }

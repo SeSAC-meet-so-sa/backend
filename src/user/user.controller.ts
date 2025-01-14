@@ -39,6 +39,14 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  @Patch(':id/password')
+  async updatePassword(
+    @Param('id') userId: string,
+    @Body() updatePasswordDto: { oldPassword: string; newPassword: string },
+  ) {
+    return this.userService.updatePassword(userId, updatePasswordDto);
+  }
+
   @Patch(':id/profile')
   @UseInterceptors(FileInterceptor('profileImage'))
   async updateProfile(
@@ -54,14 +62,6 @@ export class UserController {
       ...updateData,
       profileImage: profileImageUrl,
     });
-  }
-
-  @Patch(':id/points')
-  async updatePoints(
-    @Param('id') userId: string,
-    @Body('delta') delta: number, // 요청으로 delta 값을 전달받음
-  ) {
-    return this.userService.updatePoints(userId, delta);
   }
 
   @Delete(':id')
@@ -108,5 +108,14 @@ export class UserController {
     @Query('month') month: number,
   ) {
     return this.userService.getMoodsByMonth(userId, year, month);
+  }
+
+  @Patch(':id/points')
+  async updatePoints(
+    @Param('id') userId: string,
+    @Body() updatePointsDto: { delta: number; description: string },
+  ) {
+    const { delta, description } = updatePointsDto;
+    return this.userService.updateUserPoints(userId, delta, description);
   }
 }
