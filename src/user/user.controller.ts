@@ -37,6 +37,14 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
+  @Patch(':id/points')
+  async updatePoints(
+    @Param('id') userId: string,
+    @Body('delta') delta: number, // 요청으로 delta 값을 전달받음
+  ) {
+    return this.userService.updatePoints(userId, delta);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
