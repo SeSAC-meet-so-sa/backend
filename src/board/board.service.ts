@@ -77,4 +77,39 @@ export class BoardService {
     }
     return deleted;
   }
+
+  async searchBoards(query: string): Promise<Board[]> {
+    const filter: any = {};
+
+    // 제목과 내용에서 검색
+    filter.$or = [
+      { title: { $regex: query, $options: 'i' } },
+      { content: { $regex: query, $options: 'i' } },
+      { author: { $regex: query, $options: 'i' } },
+    ];
+
+    // 작성자로 검색
+    if (query.includes('author:')) {
+      const authorMatch = query.match(/author:(\S+)/);
+      if (authorMatch) {
+        filter.author = authorMatch[1];
+      }
+    }
+
+    // 날짜로 검색
+    if (query.includes('startDate:') || query.includes('endDate:')) {
+      filter.createdAt = {};
+
+      const startDateMatch = query.match(/startDate:(\S+)/);
+      if (startDateMatch) {
+        filter.createdAt.$gte = new Date(startDateMatch[1]);
+      }
+
+      const endDateMatch = query.match(/endDate:(\S+)/);
+      if (endDateMatch) {
+        filter.createdAt.$lte = new Date(endDateMatch[1]);
+      }
+    }
+    return this.boardModel.find(filter).exec();
+  }
 }

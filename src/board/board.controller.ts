@@ -8,6 +8,7 @@ import {
   Delete,
   UploadedFiles,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -26,6 +27,11 @@ import {
 @Controller('board')
 export class BoardController {
   constructor(private readonly boardService: BoardService) {}
+
+  @Get('search')
+  async searchBoards(@Query('query') query: string) {
+    return this.boardService.searchBoards(query);
+  }
 
   // @Post()
   // async create(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
