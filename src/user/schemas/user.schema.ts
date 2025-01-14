@@ -18,6 +18,9 @@ export class User extends Document {
   @Prop({ default: Date.now })
   createdAt: Date;
 
+  @Prop({ default: '' })
+  description: string;
+
   @Prop({ default: null })
   profileImage: string;
 

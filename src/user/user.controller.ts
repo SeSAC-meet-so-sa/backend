@@ -7,15 +7,22 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateMoodDto } from './dto/create-mood.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { S3Service } from 'src/s3/s3.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly s3Service: S3Service,
+  ) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -32,9 +39,21 @@ export class UserController {
     return this.userService.findById(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @Patch(':id/profile')
+  @UseInterceptors(FileInterceptor('profileImage'))
+  async updateProfile(
+    @Param('id') userId: string,
+    @UploadedFile() profileImage: Express.Multer.File,
+    @Body() updateData: { username?: string; description?: string },
+  ) {
+    let profileImageUrl: string | undefined;
+    if (profileImage) {
+      profileImageUrl = await this.s3Service.uploadFile(profileImage);
+    }
+    return this.userService.updateUserProfile(userId, {
+      ...updateData,
+      profileImage: profileImageUrl,
+    });
   }
 
   @Patch(':id/points')

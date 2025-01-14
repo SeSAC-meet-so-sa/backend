@@ -27,10 +27,28 @@ export class UserService {
     return this.userModel.findById(id).exec();
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
-    return this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
+  async updateUserProfile(
+    userId: string,
+    updateData: {
+      username?: string;
+      description?: string;
+      profileImage?: string;
+    },
+  ): Promise<Partial<User>> {
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
+      .select('username profileImage description')
       .exec();
+
+    if (!updatedUser) {
+      throw new Error('User not found');
+    }
+
+    return {
+      username: updatedUser.username,
+      profileImage: updatedUser.profileImage,
+      description: updatedUser.description,
+    };
   }
 
   remove(id: string) {
