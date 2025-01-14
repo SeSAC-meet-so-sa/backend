@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -35,6 +35,16 @@ export class UserService {
       profileImage?: string;
     },
   ): Promise<Partial<User>> {
+    // Check if the username already exists
+    if (updateData.username) {
+      const existingUser = await this.userModel
+        .findOne({ username: updateData.username })
+        .exec();
+
+      if (existingUser && existingUser._id.toString() !== userId) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
     const updatedUser = await this.userModel
       .findByIdAndUpdate(userId, { $set: updateData }, { new: true })
       .select('username profileImage description')
