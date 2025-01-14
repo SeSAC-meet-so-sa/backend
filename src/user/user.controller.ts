@@ -39,6 +39,14 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  @Patch(':id/password')
+  async updatePassword(
+    @Param('id') userId: string,
+    @Body() updatePasswordDto: { oldPassword: string; newPassword: string },
+  ) {
+    return this.userService.updatePassword(userId, updatePasswordDto);
+  }
+
   @Patch(':id/profile')
   @UseInterceptors(FileInterceptor('profileImage'))
   async updateProfile(

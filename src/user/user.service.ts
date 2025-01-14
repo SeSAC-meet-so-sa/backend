@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { MoodEntry } from './schemas/moodEntry.schema';
 import { CreateMoodDto } from './dto/create-mood.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UserService {
@@ -153,5 +154,35 @@ export class UserService {
         entryDate.getFullYear() == year && entryDate.getMonth() + 1 == month // JavaScript months are 0-indexed
       );
     });
+  }
+
+  async updatePassword(
+    userId: string,
+    updatePasswordDto: { oldPassword: string; newPassword: string },
+  ) {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(
+      updatePasswordDto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+
+    if (updatePasswordDto.oldPassword === updatePasswordDto.newPassword) {
+      throw new BadRequestException('Password is the same as current password');
+    }
+
+    const hashedPassword = await bcrypt.hash(updatePasswordDto.newPassword, 10);
+    await this.userModel
+      .findByIdAndUpdate(userId, { password: hashedPassword })
+      .exec();
+
+    return { message: 'Password updated successfully' };
   }
 }
