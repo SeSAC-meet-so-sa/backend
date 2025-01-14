@@ -36,6 +36,12 @@ export class User extends Document {
 
   @Prop({ type: [PointHistory], default: [] })
   pointHistory: PointHistory[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  followers: Types.ObjectId[]; // 나를 팔로우한 유저
+
+  @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
+  following: Types.ObjectId[]; // 내가 팔로우하는 유저
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

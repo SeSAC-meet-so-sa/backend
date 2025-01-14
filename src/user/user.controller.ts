@@ -118,4 +118,52 @@ export class UserController {
     const { delta, description } = updatePointsDto;
     return this.userService.updateUserPoints(userId, delta, description);
   }
+
+  // follow
+  @Post('follow/:id/:targetId')
+  async followUser(
+    @Param('id') userId: string,
+    @Param('targetId') targetUserId: string,
+  ) {
+    return this.userService.followUser(userId, targetUserId);
+  }
+
+  // unfollow
+  @Delete('unfollow/:id/:targetId')
+  async unfollowUser(
+    @Param('id') userId: string,
+    @Param('targetId') targetUserId: string,
+  ) {
+    return this.userService.unfollowUser(userId, targetUserId);
+  }
+
+  // Check friendship
+  @Get('/friend/:id/:targetId')
+  async checkFriendship(
+    @Param('id') userId: string,
+    @Param('targetId') targetUserId: string,
+  ) {
+    const isFriend = await this.userService.checkFriendship(
+      userId,
+      targetUserId,
+    );
+    return { isFriend };
+  }
+
+  // Get followers list
+  @Get(':id/followers')
+  async getFollowers(@Param('id') userId: string) {
+    return this.userService.getFollowers(userId);
+  }
+
+  // Get follwing list
+  @Get(':id/following')
+  async getFollowing(@Param('id') userId: string) {
+    return this.userService.getFollowing(userId);
+  }
+
+  @Get(':id/friends')
+  async getFriends(@Param('id') userId: string) {
+    return this.userService.getFriends(userId);
+  }
 }

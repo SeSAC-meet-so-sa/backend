@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { MoodEntry } from './schemas/moodEntry.schema';
 import { CreateMoodDto } from './dto/create-mood.dto';
@@ -188,5 +188,101 @@ export class UserService {
 
     user.pointHistory.push({ description, points: delta, date: new Date() });
     return user.save();
+  }
+
+  async followUser(userId: string, targetUserId: string): Promise<User> {
+    const user = await this.userModel.findById(userId).exec();
+    const targetUser = await this.userModel.findById(targetUserId).exec();
+
+    if (!user || !targetUser) {
+      throw new Error('User not found');
+    }
+
+    if (user.following.some((id) => id.toString() === targetUserId)) {
+      throw new BadRequestException('You are already following this user.');
+    }
+    user.following.push(new Types.ObjectId(targetUserId));
+    targetUser.followers.push(new Types.ObjectId(userId));
+
+    // 필요한 부분만 저장
+    await this.userModel
+      .updateOne({ _id: targetUserId }, { $push: { followers: userId } })
+      .exec();
+    await this.userModel
+      .updateOne({ _id: userId }, { $push: { following: targetUserId } })
+      .exec();
+
+    return user;
+  }
+
+  async unfollowUser(userId: string, targetUserId: string): Promise<User> {
+    const user = await this.userModel.findById(userId).exec();
+    const targetUser = await this.userModel.findById(targetUserId).exec();
+    if (!user || !targetUser) {
+      throw new Error('User not found');
+    }
+
+    // following 및 followers 업데이트
+    await this.userModel
+      .updateOne({ _id: userId }, { $pull: { following: targetUserId } })
+      .exec();
+    await this.userModel
+      .updateOne({ _id: targetUserId }, { $pull: { followers: userId } })
+      .exec();
+
+    return user;
+  }
+
+  async checkFriendship(
+    userId: string,
+    targetUserId: string,
+  ): Promise<boolean> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return (
+      user.following.some((id) => (id) => id.toString() === targetUserId) &&
+      user.followers.some((id) => (id) => id.toString() === targetUserId)
+    );
+  }
+
+  async getFollowers(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('followers', 'username profileImage description')
+      .exec();
+
+    return user ? user.followers : [];
+  }
+
+  async getFollowing(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('following', 'username profileImage description')
+      .exec();
+
+    return user ? user.following : [];
+  }
+
+  async getFriends(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .populate('followers', 'username profileImage description')
+      .populate('following', 'username profileImage description')
+      .exec();
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // 팔로워와 팔로잉 목록에서 교집합 추출
+    const friends = user.followers.filter((follower) =>
+      user.following.some(
+        (following) => following._id.toString() === follower._id.toString(),
+      ),
+    );
+
+    return friends;
   }
 }
