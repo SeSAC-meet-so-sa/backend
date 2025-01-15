@@ -34,6 +34,9 @@ export class Board {
 
   @Prop({ default: Date.now })
   createdAt: Date;
+
+  @Prop({ default: Date.now })
+  updatedAt: Date;
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);

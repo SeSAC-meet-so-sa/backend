@@ -16,6 +16,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateMoodDto } from './dto/create-mood.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
+import { SearchUsersDto } from './dto/search-users.dto';
 
 @Controller('user')
 export class UserController {
@@ -23,6 +24,11 @@ export class UserController {
     private readonly userService: UserService,
     private readonly s3Service: S3Service,
   ) {}
+
+  @Get('search')
+  async searchUsers(@Query() query: SearchUsersDto) {
+    return this.userService.searchUsers(query);
+  }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {

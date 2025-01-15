@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -7,6 +11,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { MoodEntry } from './schemas/moodEntry.schema';
 import { CreateMoodDto } from './dto/create-mood.dto';
 import * as bcrypt from 'bcryptjs';
+import { SearchUsersDto } from './dto/search-users.dto';
 
 @Injectable()
 export class UserService {
@@ -52,7 +57,7 @@ export class UserService {
       .exec();
 
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     return {
@@ -84,7 +89,7 @@ export class UserService {
   ): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
 
-    if (!user) throw new Error('User not found');
+    if (!user) throw new NotFoundException('User not found');
     const existingEntryIndex = user.moodEntries.findIndex(
       (entry) =>
         entry.date.toISOString().split('T')[0] ===
@@ -112,7 +117,7 @@ export class UserService {
   async deleteMoodEntry(userId: string, date: Date): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Filter out the entry matching the given date
@@ -132,7 +137,7 @@ export class UserService {
   ): Promise<MoodEntry[]> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     console.log(year, month);
 
@@ -151,7 +156,7 @@ export class UserService {
   ) {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Verify current password
@@ -182,7 +187,7 @@ export class UserService {
   ): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     user.points += delta;
 
@@ -195,7 +200,7 @@ export class UserService {
     const targetUser = await this.userModel.findById(targetUserId).exec();
 
     if (!user || !targetUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     if (user.following.some((id) => id.toString() === targetUserId)) {
@@ -219,7 +224,7 @@ export class UserService {
     const user = await this.userModel.findById(userId).exec();
     const targetUser = await this.userModel.findById(targetUserId).exec();
     if (!user || !targetUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // following 및 followers 업데이트
@@ -239,7 +244,7 @@ export class UserService {
   ): Promise<boolean> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     return (
       user.following.some((id) => (id) => id.toString() === targetUserId) &&
@@ -273,7 +278,7 @@ export class UserService {
       .exec();
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // 팔로워와 팔로잉 목록에서 교집합 추출
@@ -284,5 +289,38 @@ export class UserService {
     );
 
     return friends;
+  }
+
+  async searchUsers(query: SearchUsersDto): Promise<User[]> {
+    const filter: any = {};
+
+    //  키워드 검색
+    if (query.keyword) {
+      filter.$or = [
+        { username: { $regex: query.keyword, $options: 'i' } },
+        { email: { $regex: query.keyword, $options: 'i' } },
+        { description: { $regex: query.keyword, $options: 'i' } },
+      ];
+    }
+
+    // 정렬 조건
+    const sort: any = {};
+    if (query.sortBy) {
+      sort[query.sortBy] = query.sortOrder === 'desc' ? -1 : 1;
+    }
+
+    // 페이지네이션
+    const page = query.page || 1;
+    const limit = query.limit || 5;
+    const skip = (page - 1) * limit;
+
+    // 쿼리 실행
+    return this.userModel
+      .find(filter)
+      .select('username email profileImage description')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .exec();
   }
 }
