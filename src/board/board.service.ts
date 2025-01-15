@@ -8,12 +8,15 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 import { S3Service } from 'src/s3/s3.service';
 import { ToggleBookmarkDto, ToggleLikeDto } from './dto/like-and-bookmark.dto';
 import { SortOrder } from 'mongoose';
+import { UserService } from 'src/user/user.service';
+import { BoardWithAuthorDto } from './dto/board-with-author.dto';
 
 @Injectable()
 export class BoardService {
   constructor(
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     private readonly s3Service: S3Service,
+    private readonly userService: UserService,
   ) {}
 
   // async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
@@ -50,16 +53,37 @@ export class BoardService {
     return this.boardModel.find().exec();
   }
 
-  async getBoardById(boardId: string) {
+  async getBoardById(boardId: string): Promise<BoardWithAuthorDto> {
     const board = await this.boardModel.findById(boardId).exec();
     if (!board) {
       throw new NotFoundException(`Board #${boardId} not found`);
     }
 
+    const author = await this.userService.findById(board.author);
+    if (!author) {
+      throw new NotFoundException('Author not found');
+    }
+
     // 조회수 증가
     board.viewCount += 1;
     await board.save();
-    return board;
+
+    return {
+      title: board.title,
+      content: board.content,
+      images: board.images,
+      visibility: board.visibility,
+      likes: board.likes,
+      bookmarks: board.bookmarks,
+      viewCount: board.viewCount,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
+      author: {
+        username: author.username,
+        profileImage: author.profileImage,
+        description: author.description,
+      },
+    };
   }
 
   async updateBoard(boardId: string, updateBoardDto: UpdateBoardDto) {

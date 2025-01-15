@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { ToggleBookmarkDto, ToggleLikeDto } from './dto/like-and-bookmark.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { BoardWithAuthorDto } from './dto/board-with-author.dto';
 
 @ApiTags('Board')
 @Controller('board')
@@ -130,7 +131,9 @@ export class BoardController {
     description: '게시글 상세 조회 성공',
     type: Board,
   })
-  async findOne(@Param('boardId') boardId: string): Promise<Board> {
+  async findOne(
+    @Param('boardId') boardId: string,
+  ): Promise<BoardWithAuthorDto> {
     return this.boardService.getBoardById(boardId);
   }
 
