@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -53,7 +57,7 @@ export class UserService {
       .exec();
 
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     return {
@@ -85,7 +89,7 @@ export class UserService {
   ): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
 
-    if (!user) throw new Error('User not found');
+    if (!user) throw new NotFoundException('User not found');
     const existingEntryIndex = user.moodEntries.findIndex(
       (entry) =>
         entry.date.toISOString().split('T')[0] ===
@@ -113,7 +117,7 @@ export class UserService {
   async deleteMoodEntry(userId: string, date: Date): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Filter out the entry matching the given date
@@ -133,7 +137,7 @@ export class UserService {
   ): Promise<MoodEntry[]> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     console.log(year, month);
 
@@ -152,7 +156,7 @@ export class UserService {
   ) {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // Verify current password
@@ -183,7 +187,7 @@ export class UserService {
   ): Promise<User | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     user.points += delta;
 
@@ -196,7 +200,7 @@ export class UserService {
     const targetUser = await this.userModel.findById(targetUserId).exec();
 
     if (!user || !targetUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     if (user.following.some((id) => id.toString() === targetUserId)) {
@@ -220,7 +224,7 @@ export class UserService {
     const user = await this.userModel.findById(userId).exec();
     const targetUser = await this.userModel.findById(targetUserId).exec();
     if (!user || !targetUser) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // following 및 followers 업데이트
@@ -240,7 +244,7 @@ export class UserService {
   ): Promise<boolean> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
     return (
       user.following.some((id) => (id) => id.toString() === targetUserId) &&
@@ -274,7 +278,7 @@ export class UserService {
       .exec();
 
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     // 팔로워와 팔로잉 목록에서 교집합 추출
