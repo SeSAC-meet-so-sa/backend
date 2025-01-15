@@ -25,6 +25,11 @@ export class UserController {
     private readonly s3Service: S3Service,
   ) {}
 
+  @Get('search')
+  async searchUsers(@Query() query: SearchUsersDto) {
+    return this.userService.searchUsers(query);
+  }
+
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -166,10 +171,5 @@ export class UserController {
   @Get(':id/friends')
   async getFriends(@Param('id') userId: string) {
     return this.userService.getFriends(userId);
-  }
-
-  @Get('search')
-  async searchUsers(@Query() query: SearchUsersDto) {
-    return this.userService.searchUsers(query);
   }
 }

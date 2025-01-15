@@ -307,12 +307,13 @@ export class UserService {
 
     // 페이지네이션
     const page = query.page || 1;
-    const limit = query.limit || 10;
+    const limit = query.limit || 5;
     const skip = (page - 1) * limit;
 
     // 쿼리 실행
     return this.userModel
       .find(filter)
+      .select('username email profileImage description')
       .sort(sort)
       .skip(skip)
       .limit(limit)
