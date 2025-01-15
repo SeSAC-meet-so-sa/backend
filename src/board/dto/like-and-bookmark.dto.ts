@@ -2,9 +2,9 @@ import { IsString } from 'class-validator';
 
 export class ToggleBookmarkDto {
   @IsString()
-  postId: string;
+  boardId: string;
 }
 export class ToggleLikeDto {
   @IsString()
-  postId: string;
+  boardId: string;
 }

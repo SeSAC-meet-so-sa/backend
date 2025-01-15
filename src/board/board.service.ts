@@ -116,32 +116,32 @@ export class BoardService {
   }
 
   async toggleBookmark(userId: string, toggleBookmarkDto: ToggleBookmarkDto) {
-    const { postId } = toggleBookmarkDto;
-    const post = await this.boardModel.findById(postId);
-    if (!post) throw new Error('Post not found');
+    const { boardId } = toggleBookmarkDto;
+    const board = await this.boardModel.findById(boardId);
+    if (!board) throw new Error('Post not found');
 
-    const isBookmarked = post.bookmarks.includes(userId);
+    const isBookmarked = board.bookmarks.includes(userId);
     if (isBookmarked) {
-      post.bookmarks = post.bookmarks.filter((id) => id !== userId);
+      board.bookmarks = board.bookmarks.filter((id) => id !== userId);
     } else {
-      post.bookmarks.push(userId);
+      board.bookmarks.push(userId);
     }
-    await post.save();
+    await board.save();
     return { message: isBookmarked ? 'Bookmark removed' : 'Bookmark added' };
   }
 
   async toggleLike(userId: string, toggleLikeDto: ToggleLikeDto) {
-    const { postId } = toggleLikeDto;
-    const post = await this.boardModel.findById(postId);
-    if (!post) throw new Error('Post not found');
+    const { boardId } = toggleLikeDto;
+    const board = await this.boardModel.findById(boardId);
+    if (!board) throw new Error('Post not found');
 
-    const isLiked = post.likes.includes(userId);
+    const isLiked = board.likes.includes(userId);
     if (isLiked) {
-      post.likes = post.likes.filter((id) => id !== userId);
+      board.likes = board.likes.filter((id) => id !== userId);
     } else {
-      post.likes.push(userId);
+      board.likes.push(userId);
     }
-    await post.save();
+    await board.save();
 
     return { message: isLiked ? 'Like removed' : 'Like added' };
   }
@@ -159,6 +159,10 @@ export class BoardService {
 
   async getMyPosts(userId: string, search: string) {
     const query = { author: userId };
+
+    // console.log('User ID:', userId);
+    // console.log('Query:', query);
+
     if (search) {
       query['$or'] = [
         { title: { $regex: search, $options: 'i' } },
