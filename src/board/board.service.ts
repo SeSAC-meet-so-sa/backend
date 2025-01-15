@@ -6,6 +6,8 @@ import { Board, BoardDocument } from './schemas/board.schema';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { S3Service } from 'src/s3/s3.service';
+import { ToggleBookmarkDto, ToggleLikeDto } from './dto/like-and-bookmark.dto';
+import { SortOrder } from 'mongoose';
 
 @Injectable()
 export class BoardService {
@@ -111,5 +113,71 @@ export class BoardService {
       }
     }
     return this.boardModel.find(filter).exec();
+  }
+
+  async toggleBookmark(userId: string, toggleBookmarkDto: ToggleBookmarkDto) {
+    const { postId } = toggleBookmarkDto;
+    const post = await this.boardModel.findById(postId);
+    if (!post) throw new Error('Post not found');
+
+    const isBookmarked = post.bookmarks.includes(userId);
+    if (isBookmarked) {
+      post.bookmarks = post.bookmarks.filter((id) => id !== userId);
+    } else {
+      post.bookmarks.push(userId);
+    }
+    await post.save();
+    return { message: isBookmarked ? 'Bookmark removed' : 'Bookmark added' };
+  }
+
+  async toggleLike(userId: string, toggleLikeDto: ToggleLikeDto) {
+    const { postId } = toggleLikeDto;
+    const post = await this.boardModel.findById(postId);
+    if (!post) throw new Error('Post not found');
+
+    const isLiked = post.likes.includes(userId);
+    if (isLiked) {
+      post.likes = post.likes.filter((id) => id !== userId);
+    } else {
+      post.likes.push(userId);
+    }
+    await post.save();
+
+    return { message: isLiked ? 'Like removed' : 'Like added' };
+  }
+
+  async getBookmarkedPosts(userId: string, search: string) {
+    const query = { bookmarks: userId };
+    if (search) {
+      query['$or'] = [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ];
+    }
+    return this.boardModel.find(query).select('title content author createdAt');
+  }
+
+  async getMyPosts(userId: string, search: string) {
+    const query = { author: userId };
+    if (search) {
+      query['$or'] = [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+      ];
+    }
+    return this.boardModel.find(query).select('title content author createdAt');
+  }
+
+  async getAllPosts(page: number, sort: string) {
+    const sortOption: { [key: string]: SortOrder } =
+      sort === 'popular' ? { likes: -1, createdAt: -1 } : { createdAt: -1 };
+    const limit = 12;
+    const skip = (page - 1) * limit;
+    return this.boardModel
+      .find()
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .select('title content author likes bookmarks createdAt');
   }
 }

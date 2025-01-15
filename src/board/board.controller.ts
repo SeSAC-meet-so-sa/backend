@@ -9,6 +9,7 @@ import {
   UploadedFiles,
   UseInterceptors,
   Query,
+  Request,
 } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -22,6 +23,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ToggleBookmarkDto, ToggleLikeDto } from './dto/like-and-bookmark.dto';
 
 @ApiTags('Board')
 @Controller('board')
@@ -133,5 +135,37 @@ export class BoardController {
   })
   async remove(@Param('boardId') boardId: string): Promise<Board> {
     return this.boardService.deleteBoard(boardId);
+  }
+
+  @Post('toggle-bookmark')
+  async toggleBookmark(
+    @Request() req,
+    @Body() toggleBookmarkDto: ToggleBookmarkDto,
+  ) {
+    const userId = req.user.id;
+    return this.boardService.toggleBookmark(userId, toggleBookmarkDto);
+  }
+
+  @Post('toggle-like')
+  async toggleLike(@Request() req, @Body() toggleLikeDto: ToggleLikeDto) {
+    const userId = req.user.id;
+    return this.boardService.toggleLike(userId, toggleLikeDto);
+  }
+
+  @Get('bookmarked-posts')
+  async getBookmarkedPosts(@Request() req, @Query('search') search: string) {
+    const userId = req.user.id;
+    return this.boardService.getBookmarkedPosts(userId, search);
+  }
+
+  @Get('my-posts')
+  async getMyPosts(@Request() req, @Query('search') search: string) {
+    const userId = req.user.id;
+    return this.boardService.getMyPosts(userId, search);
+  }
+
+  @Get('all-posts')
+  async getAllPosts(@Query('page') page: number, @Query('sort') sort: string) {
+    return this.boardService.getAllPosts(page, sort);
   }
 }
