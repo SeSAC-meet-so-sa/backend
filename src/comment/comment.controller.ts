@@ -28,9 +28,9 @@ export class CommentController {
     );
   }
 
-  @Get(':boardId')
+  @Get('/:boardId')
   async getComments(@Param('boardId') boardId: string) {
-    return this.commentService.getCommentsByBoard(boardId);
+    return this.commentService.getComments(boardId);
   }
 
   @Get('replies/:parentCommentId')
