@@ -9,6 +9,7 @@ export class BoardWithAuthorDto {
   createdAt: Date;
   updatedAt: Date;
   author: {
+    id: string;
     username: string;
     profileImage: string;
     description: string;

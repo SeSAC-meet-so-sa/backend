@@ -79,6 +79,7 @@ export class BoardService {
       createdAt: board.createdAt,
       updatedAt: board.updatedAt,
       author: {
+        id: board.author,
         username: author.username,
         profileImage: author.profileImage,
         description: author.description,
