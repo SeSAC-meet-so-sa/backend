@@ -102,6 +102,7 @@ export class UserService {
       // Update the existing entry
       user.moodEntries[existingEntryIndex].mood = createMoodDto.mood;
       user.moodEntries[existingEntryIndex].memo = createMoodDto.memo || '';
+      user.markModified('moodEntries');
     } else {
       // Add a new entry
       user.moodEntries.push({
