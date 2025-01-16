@@ -28,7 +28,7 @@ export class AuthService {
 
     while (!isUnique) {
       // 랜덤 문자열 생성 (8자리)
-      username = `user-${uuidv4().slice(0, 8)}`;
+      username = `믿으미${uuidv4().slice(0, 8)}`;
 
       // 중복 여부 확인
       const existingUser = await this.userModel.findOne({ username });
