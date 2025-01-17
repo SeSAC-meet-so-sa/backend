@@ -72,7 +72,7 @@ export class BoardController {
 
   @Get('all-posts')
   async getAllPosts(@Query('page') page: number, @Query('sort') sort: string) {
-    return this.boardService.getAllPosts(page, sort);
+    return this.boardService.getAllBoards(page, sort);
   }
 
   // @Post()

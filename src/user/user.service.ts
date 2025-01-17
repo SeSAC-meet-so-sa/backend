@@ -102,6 +102,7 @@ export class UserService {
       // Update the existing entry
       user.moodEntries[existingEntryIndex].mood = createMoodDto.mood;
       user.moodEntries[existingEntryIndex].memo = createMoodDto.memo || '';
+      user.markModified('moodEntries');
     } else {
       // Add a new entry
       user.moodEntries.push({
@@ -148,6 +149,18 @@ export class UserService {
         entryDate.getFullYear() == year && entryDate.getMonth() + 1 == month // JavaScript months are 0-indexed
       );
     });
+  }
+
+  async getUserMoodForDate(userId: string, date: Date): Promise<string | null> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) return null;
+
+    const targetDate = date.toISOString().split('T')[0];
+    const moodEntry = user.moodEntries.find(
+      (entry) => entry.date.toISOString().split('T')[0] === targetDate,
+    );
+
+    return moodEntry ? moodEntry.mood : null;
   }
 
   async updatePassword(
