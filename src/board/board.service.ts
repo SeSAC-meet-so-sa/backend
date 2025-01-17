@@ -10,6 +10,7 @@ import { ToggleBookmarkDto, ToggleLikeDto } from './dto/like-and-bookmark.dto';
 import { SortOrder } from 'mongoose';
 import { UserService } from 'src/user/user.service';
 import { BoardWithAuthorDto } from './dto/board-with-author.dto';
+import { QuestionService } from 'src/question/question.service';
 
 @Injectable()
 export class BoardService {
@@ -17,6 +18,7 @@ export class BoardService {
     @InjectModel(Board.name) private boardModel: Model<BoardDocument>,
     private readonly s3Service: S3Service,
     private readonly userService: UserService,
+    private readonly questionService: QuestionService,
   ) {}
 
   // async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
@@ -26,9 +28,11 @@ export class BoardService {
   //   return result;
   // }
 
-  async createBoard(createBoardDto: CreateBoardDto) {
+  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, content, images, visibility, author } = createBoardDto;
     const imageUrls = [];
+    const resolvedTitle =
+      title || (await this.questionService.getDailyQuestion()).title;
 
     // S3에 이미지를 업로드해봅시다
     if (images && images.length > 0) {
@@ -40,7 +44,7 @@ export class BoardService {
 
     // 새로운 게시물을 생성해봅시다....
     const newBoard = new this.boardModel({
-      title,
+      title: resolvedTitle,
       content,
       images: imageUrls,
       visibility,
@@ -53,7 +57,7 @@ export class BoardService {
     return this.boardModel.find().exec();
   }
 
-  async getBoardById(boardId: string): Promise<BoardWithAuthorDto> {
+  async getBoardById(boardId: string) {
     const board = await this.boardModel.findById(boardId).exec();
     if (!board) {
       throw new NotFoundException(`Board #${boardId} not found`);
@@ -64,26 +68,33 @@ export class BoardService {
       throw new NotFoundException('Author not found');
     }
 
+    const userMood = await this.userService.getUserMoodForDate(
+      board.author,
+      new Date(board.createdAt), // 작성일의 무드 정보 가져오기
+    );
+
     // 조회수 증가
     board.viewCount += 1;
     await board.save();
 
     return {
+      id: board.id,
       title: board.title,
       content: board.content,
       images: board.images,
+      createdAt: board.createdAt,
+      updatedAt: board.updatedAt,
       visibility: board.visibility,
       likes: board.likes,
       bookmarks: board.bookmarks,
       viewCount: board.viewCount,
-      createdAt: board.createdAt,
-      updatedAt: board.updatedAt,
       author: {
-        id: board.author,
+        id: author.id,
         username: author.username,
         profileImage: author.profileImage,
-        description: author.description,
+        mood: userMood, // 작성일의 무드 정보
       },
+      likesCount: board.likes.length,
     };
   }
 
@@ -197,16 +208,49 @@ export class BoardService {
     return this.boardModel.find(query).select('title content author createdAt');
   }
 
-  async getAllPosts(page: number, sort: string) {
+  async getAllBoards(page: number, sort: string) {
     const sortOption: { [key: string]: SortOrder } =
       sort === 'popular' ? { likes: -1, createdAt: -1 } : { createdAt: -1 };
     const limit = 12;
     const skip = (page - 1) * limit;
-    return this.boardModel
+
+    const boards = await this.boardModel
       .find()
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
-      .select('title content author likes bookmarks createdAt');
+      .populate('author', 'id username profileImage') // 작성자 정보 가져오기
+      .exec();
+
+    const result = await Promise.all(
+      boards.map(async (board) => {
+        const author = await this.userService.findById(board.author);
+        if (!author) {
+          throw new NotFoundException('Author not found');
+        }
+
+        const userMood = await this.userService.getUserMoodForDate(
+          board.author,
+          new Date(board.createdAt), // 작성일의 무드 정보 가져오기
+        );
+
+        return {
+          id: board.id,
+          title: board.title,
+          content: board.content,
+          images: board.images,
+          createdAt: board.createdAt,
+          author: {
+            id: author.id,
+            username: author.username,
+            profileImage: author.profileImage,
+            mood: userMood, // 오늘의 무드 정보
+          },
+          likesCount: board.likes.length,
+        };
+      }),
+    );
+
+    return result;
   }
 }

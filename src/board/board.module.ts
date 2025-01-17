@@ -7,6 +7,7 @@ import { Board, BoardSchema } from './schemas/board.schema';
 import { S3Module } from 'src/s3/s3.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { UserModule } from 'src/user/user.module';
+import { QuestionModule } from 'src/question/question.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { UserModule } from 'src/user/user.module';
     S3Module,
     AuthModule,
     UserModule,
+    QuestionModule,
   ],
   controllers: [BoardController],
   providers: [BoardService],

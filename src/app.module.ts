@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Module } from './s3/s3.module';
 import { CommentModule } from './comment/comment.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CommentModule } from './comment/comment.module';
     AuthModule,
     S3Module,
     CommentModule,
+    QuestionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

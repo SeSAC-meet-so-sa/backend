@@ -151,6 +151,18 @@ export class UserService {
     });
   }
 
+  async getUserMoodForDate(userId: string, date: Date): Promise<string | null> {
+    const user = await this.userModel.findById(userId).exec();
+    if (!user) return null;
+
+    const targetDate = date.toISOString().split('T')[0];
+    const moodEntry = user.moodEntries.find(
+      (entry) => entry.date.toISOString().split('T')[0] === targetDate,
+    );
+
+    return moodEntry ? moodEntry.mood : null;
+  }
+
   async updatePassword(
     userId: string,
     updatePasswordDto: { oldPassword: string; newPassword: string },

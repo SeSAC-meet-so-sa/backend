@@ -6,7 +6,7 @@ export class CreateBoardDto {
     description: '질문',
     example: '가장 기억에 남는 일은 무엇인가요?',
   })
-  title: string;
+  title?: string;
 
   @ApiProperty({
     description: '게시글 내용',
