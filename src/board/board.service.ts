@@ -226,7 +226,15 @@ export class BoardService {
       boards.map(async (board) => {
         const author = await this.userService.findById(board.author);
         if (!author) {
-          throw new NotFoundException('Author not found');
+          return {
+            id: board.id,
+            title: board.title,
+            content: board.content,
+            images: board.images,
+            createdAt: board.createdAt,
+            author: null,
+            likesCount: board.likes.length,
+          };
         }
 
         const userMood = await this.userService.getUserMoodForDate(
@@ -244,7 +252,7 @@ export class BoardService {
             id: author.id,
             username: author.username,
             profileImage: author.profileImage,
-            mood: userMood, // 오늘의 무드 정보
+            mood: userMood,
           },
           likesCount: board.likes.length,
         };
