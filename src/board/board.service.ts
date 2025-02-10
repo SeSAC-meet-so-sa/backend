@@ -116,7 +116,12 @@ export class BoardService {
     return deleted;
   }
 
-  async searchBoards(query: string): Promise<Board[]> {
+  async searchBoards(
+    query: string,
+    page: number = 1,
+    limit: number = 12,
+    sort: string = 'latest',
+  ): Promise<{ boards: Board[]; total: number }> {
     const filter: any = {};
 
     // 제목과 내용에서 검색
@@ -148,7 +153,27 @@ export class BoardService {
         filter.createdAt.$lte = new Date(endDateMatch[1]);
       }
     }
-    return this.boardModel.find(filter).exec();
+
+    // 정렬 옵션 설정
+    const sortOption: { [key: string]: SortOrder } =
+      sort === 'popular' ? { likes: -1, createdAt: -1 } : { createdAt: -1 };
+
+    // 전체 문서 개수 조회 (페이지네이션을 위한 total count)
+    const total = await this.boardModel.countDocuments(filter);
+
+    // 페이지네이션 적용
+    const skip = (page - 1) * limit;
+
+    // 검색된 게시글 목록 가져오기
+    const boards = await this.boardModel
+      .find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'id username profileImage') // 작성자 정보 가져오기
+      .exec();
+
+    return { boards, total };
   }
 
   async toggleBookmark(userId: string, toggleBookmarkDto: ToggleBookmarkDto) {
