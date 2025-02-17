@@ -336,4 +336,8 @@ export class UserService {
       .limit(limit)
       .exec();
   }
+
+  async buyTheme(userId: string, theme: string) {
+    const user = await this.userModel.findById(userId);
+  }
 }
