@@ -121,7 +121,7 @@ export class BoardService {
     page: number = 1,
     limit: number = 12,
     sort: string = 'latest',
-  ): Promise<{ boards: Board[]; total: number }> {
+  ): Promise<{ boards: any[]; total: number }> {
     const filter: any = {};
 
     // 제목과 내용에서 검색
@@ -163,17 +163,59 @@ export class BoardService {
 
     // 페이지네이션 적용
     const skip = (page - 1) * limit;
+    if (skip >= total) {
+      return { boards: [], total };
+    }
 
     // 검색된 게시글 목록 가져오기
+
+    // 검색된 게시글 목록 가져오기 (author 정보 포함)
     const boards = await this.boardModel
       .find(filter)
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
-      .populate('author', 'id username profileImage') // 작성자 정보 가져오기
+      .populate('author', 'id username profileImage') // 작성자 정보 포함
       .exec();
 
-    return { boards, total };
+    const result = await Promise.all(
+      boards.map(async (board) => {
+        const author = await this.userService.findById(board.author);
+        if (!author) {
+          return {
+            id: board.id,
+            title: board.title,
+            content: board.content,
+            images: board.images,
+            createdAt: board.createdAt,
+            author: null,
+            likesCount: board.likes.length,
+          };
+        }
+
+        const userMood = await this.userService.getUserMoodForDate(
+          board.author,
+          new Date(board.createdAt), // 작성일의 무드 정보 가져오기
+        );
+
+        return {
+          id: board.id,
+          title: board.title,
+          content: board.content,
+          images: board.images,
+          createdAt: board.createdAt,
+          author: {
+            id: author.id,
+            username: author.username,
+            profileImage: author.profileImage,
+            mood: userMood,
+          },
+          likesCount: board.likes.length,
+        };
+      }),
+    );
+
+    return { boards: result, total };
   }
 
   async toggleBookmark(userId: string, toggleBookmarkDto: ToggleBookmarkDto) {
@@ -238,6 +280,13 @@ export class BoardService {
       sort === 'popular' ? { likes: -1, createdAt: -1 } : { createdAt: -1 };
     const limit = 12;
     const skip = (page - 1) * limit;
+    // 전체 게시글 개수 조회
+    const total = await this.boardModel.countDocuments();
+
+    // 페이지 범위를 초과하면 빈 배열 반환
+    if (skip >= total) {
+      return { boards: [], total };
+    }
 
     const boards = await this.boardModel
       .find()
@@ -246,6 +295,10 @@ export class BoardService {
       .limit(limit)
       .populate('author', 'id username profileImage') // 작성자 정보 가져오기
       .exec();
+
+    if (!boards || boards.length === 0) {
+      throw new NotFoundException('No boards found on this page');
+    }
 
     const result = await Promise.all(
       boards.map(async (board) => {
