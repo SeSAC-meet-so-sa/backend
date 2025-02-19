@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from './schemas/user.schema';
 import { MoodEntry, MoodEntrySchema } from './schemas/moodEntry.schema';
 import { S3Module } from 'src/s3/s3.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { S3Module } from 'src/s3/s3.module';
       { name: MoodEntry.name, schema: MoodEntrySchema },
     ]),
     S3Module,
+    AuthModule,
   ],
   controllers: [UserController],
   providers: [UserService],

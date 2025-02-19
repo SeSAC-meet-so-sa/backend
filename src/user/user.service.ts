@@ -336,4 +336,62 @@ export class UserService {
       .limit(limit)
       .exec();
   }
+
+  // 테마 구매
+  async buyTheme(userId: string, theme: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.purchasedThemes.includes(theme)) {
+      throw new BadRequestException('이미 구매한 테마입니다.');
+    }
+    user.purchasedThemes.push(theme);
+    await user.save();
+
+    return { message: '테마 구매 완료', purchasedThemes: user.purchasedThemes };
+  }
+
+  // 현재 테마 변경
+  async changeTheme(userId: string, theme: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.purchasedThemes.includes(theme)) {
+      throw new BadRequestException('해당 테마를 구매하지 않았습니다.');
+    }
+
+    user.activeTheme = theme;
+    await user.save();
+
+    return { message: '테마 변경 완료', activeTheme: user.activeTheme };
+  }
+
+  // 폰트 구매
+  async buyFont(userId: string, font: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.purchasedFonts.includes(font)) {
+      throw new BadRequestException('이미 구매한 폰트입니다.');
+    }
+
+    user.purchasedFonts.push(font);
+    await user.save();
+
+    return { message: '폰트 구매 완료', purchasedFonts: user.purchasedFonts };
+  }
+
+  // 폰트 변경 API
+  async changeFont(userId: string, font: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.purchasedFonts.includes(font)) {
+      throw new BadRequestException('해당 폰트를 구매하지 않았습니다.');
+    }
+
+    user.activeFont = font;
+    await user.save();
+
+    return { message: '폰트 변경 완료', activeFont: user.activeFont };
+  }
 }
