@@ -197,18 +197,19 @@ export class BoardService {
           board.author,
           new Date(board.createdAt), // 작성일의 무드 정보 가져오기
         );
-
         return {
           id: board.id,
           title: board.title,
           content: board.content,
           images: board.images,
           createdAt: board.createdAt,
+          visibility: board.visibility,
+          likes: board.likes,
           author: {
             id: author.id,
             username: author.username,
             profileImage: author.profileImage,
-            mood: userMood,
+            mood: userMood, // 작성일의 무드 정보
           },
           likesCount: board.likes.length,
         };

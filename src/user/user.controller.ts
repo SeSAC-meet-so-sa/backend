@@ -9,6 +9,8 @@ import {
   Query,
   UseInterceptors,
   UploadedFile,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -17,6 +19,7 @@ import { CreateMoodDto } from './dto/create-mood.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { S3Service } from 'src/s3/s3.service';
 import { SearchUsersDto } from './dto/search-users.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -171,5 +174,37 @@ export class UserController {
   @Get(':id/friends')
   async getFriends(@Param('id') userId: string) {
     return this.userService.getFriends(userId);
+  }
+
+  // 테마 구매 API
+  @UseGuards(JwtAuthGuard)
+  @Post('buy-theme')
+  async buyTheme(@Request() req, @Body('theme') theme: string) {
+    const userId = req.user.sub;
+    return this.userService.buyTheme(userId, theme);
+  }
+
+  // 테마 변경 API
+  @UseGuards(JwtAuthGuard)
+  @Post('change-theme')
+  async changeTheme(@Request() req, @Body('theme') theme: string) {
+    const userId = req.user.sub;
+    return this.userService.changeTheme(userId, theme);
+  }
+
+  // 폰트 구매 API
+  @UseGuards(JwtAuthGuard)
+  @Post('buy-font')
+  async buyFont(@Request() req, @Body('font') font: string) {
+    const userId = req.user.sub;
+    return this.userService.buyFont(userId, font);
+  }
+
+  // 폰트 변경 API
+  @UseGuards(JwtAuthGuard)
+  @Post('change-font')
+  async changeFont(@Request() req, @Body('font') font: string) {
+    const userId = req.user.sub;
+    return this.userService.changeFont(userId, font);
   }
 }
