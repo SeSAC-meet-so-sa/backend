@@ -7,6 +7,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Item, ItemDocument, ItemType } from './schemas/item.schema';
 import { UserService } from 'src/user/user.service';
+import { CreateItemDto } from './dto/create-item.dto';
 
 @Injectable()
 export class StoreService {
@@ -15,9 +16,16 @@ export class StoreService {
     private readonly userService: UserService,
   ) {}
 
-  /** 모든 아이템 목록 조회 (테마 or 폰트) */
-  async getItemsByType(type: ItemType) {
-    return this.itemModel.find({ type }).select('-__v').exec();
+  // 📌 아이템 생성
+  async createItem(createItemDto: CreateItemDto): Promise<Item> {
+    const newItem = new this.itemModel(createItemDto);
+    return newItem.save();
+  }
+
+  // 📌 모든 아이템 조회
+  async getAllItems(type?: ItemType): Promise<Item[]> {
+    const query = type ? { type } : {}; // type이 있을 경우 필터링
+    return this.itemModel.find(query).exec();
   }
 
   /** 아이템 구매 & 포인트 차감 */

@@ -5,23 +5,27 @@ import {
   Body,
   Request,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ItemType } from './schemas/item.schema';
+import { CreateItemDto } from './dto/create-item.dto';
 
 @Controller('store') // store 경로에서 관리
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
 
-  @Get('themes')
-  async getThemes() {
-    return this.storeService.getItemsByType(ItemType.THEME);
+  // 📌 아이템 추가
+  @Post()
+  async createItem(@Body() createItemDto: CreateItemDto) {
+    return this.storeService.createItem(createItemDto);
   }
 
-  @Get('fonts')
-  async getFonts() {
-    return this.storeService.getItemsByType(ItemType.FONT);
+  // 📌 아이템 목록 조회 (폰트 & 테마 필터 가능)
+  @Get()
+  async getAllItems(@Query('type') type?: ItemType) {
+    return this.storeService.getAllItems(type);
   }
 
   @UseGuards(JwtAuthGuard)

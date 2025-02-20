@@ -19,6 +19,9 @@ export class Item {
 
   @Prop()
   description?: string;
+
+  @Prop()
+  previewUrl?: string;
 }
 
 export type ItemDocument = Item & Document;
