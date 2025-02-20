@@ -44,8 +44,13 @@ export class StoreService {
       throw new BadRequestException('포인트가 부족합니다.');
     }
 
-    // 포인트 차감 및 아이템 추가
-    user.points -= item.price;
+    // 포인트 차감 및 히스토리 저장
+    await this.userService.updateUserPoints(
+      userId,
+      -item.price,
+      `${itemName} 구매`,
+    );
+    // 아이템 추가
     user.purchasedItems.push(itemName);
     await user.save();
 
