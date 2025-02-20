@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { S3Module } from './s3/s3.module';
 import { CommentModule } from './comment/comment.module';
 import { QuestionModule } from './question/question.module';
+import { StoreModule } from './store/store.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { QuestionModule } from './question/question.module';
     S3Module,
     CommentModule,
     QuestionModule,
+    StoreModule,
   ],
   controllers: [AppController],
   providers: [AppService],

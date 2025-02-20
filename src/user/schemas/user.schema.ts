@@ -44,16 +44,13 @@ export class User extends Document {
   following: Types.ObjectId[]; // 내가 팔로우하는 유저
 
   @Prop({ type: [String], default: [] })
-  purchasedThemes: string[]; // 구매한 테마 목록
+  purchasedItems: string[]; // 구매한 모든 아이템 저장
 
-  @Prop({ type: String, default: null })
-  activeTheme: string; // 현재 적용 중인 테마
+  @Prop()
+  activeTheme?: string;
 
-  @Prop({ type: [String], default: [] })
-  purchasedFonts: string[]; // 구매한 폰트 목록
-
-  @Prop({ type: String, default: null })
-  activeFont: string; // 현재 적용 중인 폰트
+  @Prop()
+  activeFont?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
