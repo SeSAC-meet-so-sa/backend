@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { Comment, CommentDocument } from './schemas/comment.schema';
 
@@ -18,16 +18,19 @@ export class CommentService {
   ) {
     const newComment = new this.commentModel({
       content,
-      author,
-      boardId,
-      parentCommentId,
+      author: new Types.ObjectId(author),
+      boardId: new Types.ObjectId(boardId),
+      parentCommentId: parentCommentId
+        ? new Types.ObjectId(parentCommentId)
+        : null,
     });
     return newComment.save();
   }
 
   async getComments(boardId: string) {
     return this.commentModel
-      .find({ boardId, parentCommentId: null })
+      .find({ boardId: new Types.ObjectId(boardId), parentCommentId: null })
+      .populate('author', 'username profileImage')
       .exec()
       .then((comments) =>
         comments.map((comment) =>
@@ -39,7 +42,10 @@ export class CommentService {
   }
 
   async getReplies(parentCommentId: string) {
-    return this.commentModel.find({ parentCommentId }).exec();
+    return this.commentModel
+      .find({ parentCommentId: new Types.ObjectId(parentCommentId) })
+      .populate('author', 'username profileImage')
+      .exec();
   }
 
   async updateComment(commentId: string, content: string) {
