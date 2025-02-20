@@ -192,7 +192,6 @@ export class UserService {
 
     return { message: 'Password updated successfully' };
   }
-
   async updateUserPoints(
     userId: string,
     delta: number,
@@ -202,10 +201,29 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
+    // 포인트 부족 확인
+    if (delta < 0 && user.points < Math.abs(delta)) {
+      throw new BadRequestException('포인트가 부족합니다.');
+    }
+
+    // 포인트 업데이트
     user.points += delta;
 
+    // 포인트 히스토리에 추가
     user.pointHistory.push({ description, points: delta, date: new Date() });
+
     return user.save();
+  }
+
+  async getUserPointHistory(userId: string) {
+    const user = await this.userModel
+      .findById(userId)
+      .select('pointHistory')
+      .exec();
+    if (!user) throw new NotFoundException('User not found');
+
+    return user.pointHistory;
   }
 
   async followUser(userId: string, targetUserId: string): Promise<User> {
@@ -335,63 +353,5 @@ export class UserService {
       .skip(skip)
       .limit(limit)
       .exec();
-  }
-
-  // 테마 구매
-  async buyTheme(userId: string, theme: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-    if (user.purchasedThemes.includes(theme)) {
-      throw new BadRequestException('이미 구매한 테마입니다.');
-    }
-    user.purchasedThemes.push(theme);
-    await user.save();
-
-    return { message: '테마 구매 완료', purchasedThemes: user.purchasedThemes };
-  }
-
-  // 현재 테마 변경
-  async changeTheme(userId: string, theme: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    if (!user.purchasedThemes.includes(theme)) {
-      throw new BadRequestException('해당 테마를 구매하지 않았습니다.');
-    }
-
-    user.activeTheme = theme;
-    await user.save();
-
-    return { message: '테마 변경 완료', activeTheme: user.activeTheme };
-  }
-
-  // 폰트 구매
-  async buyFont(userId: string, font: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    if (user.purchasedFonts.includes(font)) {
-      throw new BadRequestException('이미 구매한 폰트입니다.');
-    }
-
-    user.purchasedFonts.push(font);
-    await user.save();
-
-    return { message: '폰트 구매 완료', purchasedFonts: user.purchasedFonts };
-  }
-
-  // 폰트 변경 API
-  async changeFont(userId: string, font: string) {
-    const user = await this.userModel.findById(userId);
-    if (!user) throw new NotFoundException('User not found');
-
-    if (!user.purchasedFonts.includes(font)) {
-      throw new BadRequestException('해당 폰트를 구매하지 않았습니다.');
-    }
-
-    user.activeFont = font;
-    await user.save();
-
-    return { message: '폰트 변경 완료', activeFont: user.activeFont };
   }
 }
