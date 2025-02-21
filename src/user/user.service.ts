@@ -29,7 +29,16 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(userId: string | Types.ObjectId): Promise<User | null> {
+    const id =
+      typeof userId === 'string' && Types.ObjectId.isValid(userId)
+        ? new Types.ObjectId(userId)
+        : userId;
+
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+
     return this.userModel.findById(id).exec();
   }
 
@@ -71,8 +80,15 @@ export class UserService {
     return `This action removes a #${id} user`;
   }
 
-  async findMoodByDate(userId: string, date: Date): Promise<MoodEntry | null> {
-    const user = await this.userModel.findById(userId).exec();
+  async findMoodByDate(
+    userId: string | Types.ObjectId,
+    date: Date,
+  ): Promise<MoodEntry | null> {
+    const id =
+      typeof userId === 'string' && Types.ObjectId.isValid(userId)
+        ? new Types.ObjectId(userId)
+        : userId;
+    const user = await this.userModel.findById(id).exec();
     if (!user) return null;
     return (
       user.moodEntries.find(
@@ -151,7 +167,10 @@ export class UserService {
     });
   }
 
-  async getUserMoodForDate(userId: string, date: Date): Promise<string | null> {
+  async getUserMoodForDate(
+    userId: string | Types.ObjectId,
+    date: Date,
+  ): Promise<string | null> {
     const user = await this.userModel.findById(userId).exec();
     if (!user) return null;
 

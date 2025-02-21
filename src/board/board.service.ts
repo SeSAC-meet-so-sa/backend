@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Board, BoardDocument } from './schemas/board.schema';
 
 import { CreateBoardDto } from './dto/create-board.dto';
@@ -48,7 +48,7 @@ export class BoardService {
       content,
       images: imageUrls,
       visibility,
-      author,
+      author: new Types.ObjectId(author), // ObjectId로 변환
     });
     return newBoard.save();
   }
@@ -63,7 +63,9 @@ export class BoardService {
       throw new NotFoundException(`Board #${boardId} not found`);
     }
 
-    const author = await this.userService.findById(board.author);
+    const author = Types.ObjectId.isValid(board.author)
+      ? await this.userService.findById(board.author)
+      : null;
     if (!author) {
       throw new NotFoundException('Author not found');
     }
@@ -128,8 +130,14 @@ export class BoardService {
     filter.$or = [
       { title: { $regex: query, $options: 'i' } },
       { content: { $regex: query, $options: 'i' } },
-      { author: { $regex: query, $options: 'i' } },
     ];
+
+    // 작성자 검색
+    if (Types.ObjectId.isValid(query)) {
+      filter.$or.push({ author: new Types.ObjectId(query) });
+    } else {
+      filter.$or.push({ author: { $regex: query, $options: 'i' } });
+    }
 
     // 작성자로 검색
     if (query.includes('author:')) {
@@ -175,7 +183,11 @@ export class BoardService {
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
-      .populate('author', 'id username profileImage') // 작성자 정보 포함
+      .populate({
+        path: 'author',
+        select: 'id username profileImage',
+        transform: (doc) => (doc ? doc.toObject() : null), // Null 처리 방지
+      })
       .exec();
 
     const result = await Promise.all(
@@ -294,7 +306,11 @@ export class BoardService {
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
-      .populate('author', 'id username profileImage') // 작성자 정보 가져오기
+      .populate({
+        path: 'author',
+        select: 'id username profileImage',
+        transform: (doc) => (doc ? doc.toObject() : null), // Null 처리 방지
+      })
       .exec();
 
     if (!boards || boards.length === 0) {

@@ -1,14 +1,14 @@
 // src/board/schemas/board.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 @Schema()
 export class Board {
   @Prop({ required: true })
   title: string;
 
-  @Prop({ required: true })
-  author: string;
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  author: Types.ObjectId;
 
   @Prop({ required: true })
   content: string;
