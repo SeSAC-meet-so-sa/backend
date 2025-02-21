@@ -35,10 +35,6 @@ export class UserService {
         ? new Types.ObjectId(userId)
         : userId;
 
-    if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
-
     return this.userModel.findById(id).exec();
   }
 
