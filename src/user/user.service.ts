@@ -108,7 +108,7 @@ export class UserService {
         new Date(createMoodDto.date).toISOString().split('T')[0],
     );
 
-    console.log(existingEntryIndex);
+    // console.log(existingEntryIndex);
 
     if (existingEntryIndex >= 0) {
       // Update the existing entry
@@ -152,7 +152,7 @@ export class UserService {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    console.log(year, month);
+    // console.log(year, month);
 
     // Filter mood entries by the specified month and year
     return user.moodEntries.filter((entry) => {

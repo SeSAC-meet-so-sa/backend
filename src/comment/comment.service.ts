@@ -30,7 +30,7 @@ export class CommentService {
   async getComments(boardId: string) {
     return this.commentModel
       .find({ boardId: new Types.ObjectId(boardId), parentCommentId: null })
-      .populate('author', 'username profileImage')
+      .populate('author', 'id username profileImage')
       .exec()
       .then((comments) =>
         comments.map((comment) =>
@@ -44,7 +44,7 @@ export class CommentService {
   async getReplies(parentCommentId: string) {
     return this.commentModel
       .find({ parentCommentId: new Types.ObjectId(parentCommentId) })
-      .populate('author', 'username profileImage')
+      .populate('author', 'id username profileImage')
       .exec();
   }
 
