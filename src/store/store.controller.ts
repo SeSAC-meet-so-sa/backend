@@ -6,6 +6,7 @@ import {
   Request,
   UseGuards,
   Query,
+  Param,
 } from '@nestjs/common';
 import { StoreService } from './store.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -28,27 +29,24 @@ export class StoreController {
     return this.storeService.getAllItems(type);
   }
 
+  // 📌 아이템구매
   @UseGuards(JwtAuthGuard)
-  @Post('buy-theme')
-  async buyTheme(@Request() req, @Body('theme') theme: string) {
-    return this.storeService.buyItem(req.user.sub, theme, ItemType.THEME);
+  @Post('buy/:itemId')
+  async buyTheme(@Request() req, @Param('itemId') itemId: string) {
+    return this.storeService.buyItem(req.user.sub, itemId);
   }
 
+  // 📌 현재 아이템 변경 (ID 사용)
   @UseGuards(JwtAuthGuard)
-  @Post('buy-font')
-  async buyFont(@Request() req, @Body('font') font: string) {
-    return this.storeService.buyItem(req.user.sub, font, ItemType.FONT);
+  @Post('change/:itemId')
+  async changeItem(@Request() req, @Param('itemId') itemId: string) {
+    return this.storeService.changeItem(req.user.sub, itemId);
   }
 
+  // 📌 사용자가 구매한 아이템 목록 조회
   @UseGuards(JwtAuthGuard)
-  @Post('change-theme')
-  async changeTheme(@Request() req, @Body('theme') theme: string) {
-    return this.storeService.changeItem(req.user.sub, theme, ItemType.THEME);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('change-font')
-  async changeFont(@Request() req, @Body('font') font: string) {
-    return this.storeService.changeItem(req.user.sub, font, ItemType.FONT);
+  @Get('my-items')
+  async getMyItems(@Request() req) {
+    return this.storeService.getMyItems(req.user.sub);
   }
 }

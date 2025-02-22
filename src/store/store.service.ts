@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Item, ItemDocument, ItemType } from './schemas/item.schema';
 import { UserService } from 'src/user/user.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -29,15 +29,19 @@ export class StoreService {
   }
 
   /** 아이템 구매 & 포인트 차감 */
-  async buyItem(userId: string, itemName: string, type: ItemType) {
+  async buyItem(userId: string, itemId: string) {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const item = await this.itemModel.findOne({ name: itemName, type }).exec();
-    if (!item) throw new NotFoundException(`${type} not found`);
+    if (!Types.ObjectId.isValid(itemId)) {
+      throw new BadRequestException('Invalid item ID');
+    }
 
-    if (user.purchasedItems.includes(itemName)) {
-      throw new BadRequestException(`이미 구매한 ${type}입니다.`);
+    const item = await this.itemModel.findById(itemId).exec();
+    if (!item) throw new NotFoundException(`Item not found`);
+
+    if (user.purchasedItems.includes(itemId)) {
+      throw new BadRequestException(`이미 구매한 아이템입니다.`);
     }
 
     if (user.points < item.price) {
@@ -48,39 +52,56 @@ export class StoreService {
     await this.userService.updateUserPoints(
       userId,
       -item.price,
-      `${itemName} 구매`,
+      `${item.name} 구매`,
     );
     // 아이템 추가
-    user.purchasedItems.push(itemName);
+    user.purchasedItems.push(itemId);
     await user.save();
 
     return {
-      message: `${itemName} 구매 완료`,
+      message: `${item.name} 구매 완료`,
       remainingPoints: user.points,
       purchasedItems: user.purchasedItems,
     };
   }
 
   /** 현재 적용 아이템 변경 */
-  async changeItem(userId: string, itemName: string, type: ItemType) {
+  async changeItem(userId: string, itemId: string) {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    if (!user.purchasedItems.includes(itemName)) {
-      throw new BadRequestException(`해당 ${type}을 구매하지 않았습니다.`);
+    if (!Types.ObjectId.isValid(itemId)) {
+      throw new BadRequestException('Invalid item ID');
     }
 
-    if (type === ItemType.THEME) {
-      user.activeTheme = itemName;
-    } else if (type === ItemType.FONT) {
-      user.activeFont = itemName;
+    const item = await this.itemModel.findById(itemId).exec();
+    if (!item) throw new NotFoundException('Item not found');
+
+    if (!user.purchasedItems.includes(itemId)) {
+      throw new BadRequestException(`해당 아이템을 구매하지 않았습니다.`);
+    }
+
+    if (item.type === ItemType.THEME) {
+      user.activeTheme = itemId;
+    } else if (item.type === ItemType.FONT) {
+      user.activeFont = itemId;
     }
 
     await user.save();
     return {
-      message: `${itemName} 변경 완료`,
+      message: `${item.name} 변경 완료`,
       activeTheme: user.activeTheme,
       activeFont: user.activeFont,
     };
+  }
+
+  async getMyItems(userId: string) {
+    const user = await this.userService.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    const items = await this.itemModel
+      .find({ _id: { $in: user.purchasedItems } })
+      .exec();
+    return items;
   }
 }
