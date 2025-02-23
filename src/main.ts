@@ -8,8 +8,10 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://api.meet-da.site',
+      'https://meet-da.site',
       'http://localhost:3000',
       'http://localhost:5173',
+      'http://localhost:5174',
     ], // 허용할 도메인
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
