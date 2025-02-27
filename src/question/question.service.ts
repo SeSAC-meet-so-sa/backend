@@ -21,7 +21,11 @@ export class QuestionService {
       throw new NotFoundException('No questions available');
     }
 
-    const index = new Date().getDate() % count;
+    const kstNow = new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Seoul',
+    });
+    const kstDate = new Date(kstNow);
+    const index = kstDate.getDate() % count;
     return this.questionModel.findOne().skip(index).exec();
   }
 }
