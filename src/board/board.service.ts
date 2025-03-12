@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Board, BoardDocument } from './schemas/board.schema';
@@ -274,7 +278,10 @@ export class BoardService {
   }
 
   async getMyPosts(userId: string, search: string) {
-    const query = { author: userId };
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid user ID format');
+    }
+    const query = { author: new Types.ObjectId(userId) };
 
     // console.log('User ID:', userId);
     // console.log('Query:', query);
