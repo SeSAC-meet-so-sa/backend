@@ -98,6 +98,7 @@ export class BoardService {
         id: author.id,
         username: author.username,
         profileImage: author.profileImage,
+        description: author.description,
         mood: userMood, // 작성일의 무드 정보
       },
       likesCount: board.likes.length,
