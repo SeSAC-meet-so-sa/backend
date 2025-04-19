@@ -99,9 +99,21 @@ export class StoreService {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    const items = await this.itemModel
-      .find({ _id: { $in: user.purchasedItems } })
-      .exec();
+    // 기본 아이템 ID 설정 (환경 또는 고정된 ObjectId로 관리)
+    const DEFAULT_THEME_ID = '680352b0da05f25786f6b47e'; // 실제 ObjectId로 대체
+    const DEFAULT_FONT_ID = '680352d8da05f25786f6b480';
+
+    // 기본 아이템 ID가 없을 경우, 강제로 포함시킴 (중복 방지)
+    const purchasedSet = new Set(
+      user.purchasedItems.map((id) => id.toString()),
+    );
+    purchasedSet.add(DEFAULT_THEME_ID);
+    purchasedSet.add(DEFAULT_FONT_ID);
+
+    const allIds = Array.from(purchasedSet);
+
+    const items = await this.itemModel.find({ _id: { $in: allIds } }).exec();
+
     return items;
   }
 }
