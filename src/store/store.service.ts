@@ -22,9 +22,32 @@ export class StoreService {
     return newItem.save();
   }
 
-  // 📌 모든 아이템 조회
+  // // 📌 모든 아이템 조회
+  // async getAllItems(type?: ItemType): Promise<Item[]> {
+  //   const query = type ? { type } : {}; // type이 있을 경우 필터링
+  //   return this.itemModel.find(query).exec();
+  // }
+
+  // 📌 모든 아이템 조회 (기본 아이템 제외)
   async getAllItems(type?: ItemType): Promise<Item[]> {
-    const query = type ? { type } : {}; // type이 있을 경우 필터링
+    const DEFAULT_THEME_ID = '680508e7da05f25786f73379';
+    const DEFAULT_FONT_ID = '68050848da05f25786f732eb';
+
+    const query: any = {};
+
+    if (type) {
+      query.type = type;
+    }
+
+    // 기본 테마/폰트를 type에 따라 제외
+    if (type === ItemType.THEME) {
+      query._id = { $ne: DEFAULT_THEME_ID };
+    } else if (type === ItemType.FONT) {
+      query._id = { $ne: DEFAULT_FONT_ID };
+    } else {
+      query._id = { $nin: [DEFAULT_THEME_ID, DEFAULT_FONT_ID] };
+    }
+
     return this.itemModel.find(query).exec();
   }
 
@@ -99,11 +122,9 @@ export class StoreService {
     const user = await this.userService.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    // 기본 아이템 ID 설정 (환경 또는 고정된 ObjectId로 관리)
-    const DEFAULT_THEME_ID = '680352b0da05f25786f6b47e'; // 실제 ObjectId로 대체
-    const DEFAULT_FONT_ID = '680352d8da05f25786f6b480';
+    const DEFAULT_THEME_ID = '680508e7da05f25786f73379';
+    const DEFAULT_FONT_ID = '68050848da05f25786f732eb';
 
-    // 기본 아이템 ID가 없을 경우, 강제로 포함시킴 (중복 방지)
     const purchasedSet = new Set(
       user.purchasedItems.map((id) => id.toString()),
     );
@@ -114,6 +135,17 @@ export class StoreService {
 
     const items = await this.itemModel.find({ _id: { $in: allIds } }).exec();
 
-    return items;
+    // 정렬: 기본 테마 → 기본 폰트 → 나머지
+    const sortedItems = [
+      ...items.filter((item) => item._id.toString() === DEFAULT_THEME_ID),
+      ...items.filter((item) => item._id.toString() === DEFAULT_FONT_ID),
+      ...items.filter(
+        (item) =>
+          item._id.toString() !== DEFAULT_THEME_ID &&
+          item._id.toString() !== DEFAULT_FONT_ID,
+      ),
+    ];
+
+    return sortedItems;
   }
 }
