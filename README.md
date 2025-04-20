@@ -1,99 +1,65 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+<div align="center">
+  <div style="font: bold italic;"> 문답 기반 감정 기록 소셜 커뮤니티 플랫폼 </div>
+  <br/>
+	<br/>
+  <img src="https://github.com/user-attachments/assets/6c4f7b8e-4e35-4562-ba88-03d3a362aed6" alt="title" width="50%" height="50%" >
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+<a href="https://www.meet-da.site">https://meet-da.site</a>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+</div>
+  
+## 👩🏻‍💻‍ 팀원
 
-## Description
+<div align="center">
+  
+|<img width="142" alt="스크린샷 2025-02-24 오전 7 03 54" src="https://github.com/user-attachments/assets/e9bc7cba-dc6e-4ea5-b461-8aefa8b6dd1e" />|<img width="142" alt="스크린샷 2025-02-24 오전 7 04 21" src="https://github.com/user-attachments/assets/f6e49cdc-e02e-416e-816e-3e25e803d766" />|<img width="144" alt="스크린샷 2025-02-24 오전 7 04 28" src="https://github.com/user-attachments/assets/c9d291f1-953c-446e-a71b-28f1201c030d" />|
+|:-:|:-:|:-:|
+|<a href="https://github.com/noey-us">👑정수연</a>|<a href="https://github.com/nowgnoesiohc">최성원</a>|<a href="https://github.com/luke3151">서준형</a>|
+|<div>팀장<br/>디자인<br/>프론트엔드</div>|<div>백엔드<br/>프론트엔드<br/>배포</div>|<div>프론트엔드</div>|
+</div>
+<br>
+<br>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 👨🏻‍🏫 프로젝트 소개
 
-## Project setup
+- 최근 SNS 중에서도 **일상기록**에 초점을 둔 플랫폼들이 각광받고 있다. 이용자들이 과도한 광고와 보여주기 식 콘텐츠에 지치면서 **소소하게 자신의 진짜 경험과 기억을 남길 수 있는 플랫폼**에 몰린 결과다. 특히, 자기계발의 초점이 타인을 의식한 '성공'에서 자신의 삶을 충실하게 살아가는 **성취**로 옮겨가면서 일기에 대한 관심이 커져가고 있다.
+- 설문조사에 따르면, 전 세대에 걸쳐 SNS의 이용 목적 1순위는 '지인/친구와의 소통 등 교류'이다. 2순위는 '자신의 일상생활과 관심사 기록'이었다.
+- 이러한 사회 현상과 니즈를 반영하기 위해, 문답을 통해 자신의 감정을 들여다보고, 이를 기반으로 소통할 수 있는 SNS를 개발하였다.
+<br/>
 
-```bash
-$ yarn install
-```
+- **🏠Meet-da** 가 제공하는 서비스 - 감정 기록과 자기 성찰을 통해 일상 속 성장을 느끼고, 이를 소셜 커뮤니티를 통해 공유하는 사용자 중심 플랫폼
+ <div align="center"><img width="700" align='center' alt="스크린샷 2025-02-24 오후 12 45 11" src="https://github.com/user-attachments/assets/270c55c3-106c-4004-ae77-29f22bd67ac6" />
+</div>
 
-## Compile and run the project
+<br>
+<br>
 
-```bash
-# development
-$ yarn run start
+## 💻 기술 스택 및 아키텍처
 
-# watch mode
-$ yarn run start:dev
+**[프론트엔드]**
 
-# production mode
-$ yarn run start:prod
-```
+<!-- ![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
+<img src="https://img.shields.io/badge/axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white">
+![Styled Components](https://img.shields.io/badge/styled--components-DB7093?style=for-the-badge&logo=styled-components&logoColor=white)
+<img src="https://img.shields.io/badge/zustand?style=for-the-badge&logo=zustand&logoColor=white"> -->
 
-## Run tests
+<div align="center">
+	<img width="800" alt="스크린샷 2025-02-24 오전 7 15 09" src="https://github.com/user-attachments/assets/5b809f04-2eee-487e-a209-417f45f1e5de" />
+</div>
 
-```bash
-# unit tests
-$ yarn run test
+**[ Backend ]**
 
-# e2e tests
-$ yarn run test:e2e
+<div align="center">
+	<img width="800" alt="스크린샷 2025-02-24 오후 12 46 58" src="https://github.com/user-attachments/assets/1111ab51-b24d-42da-865f-d69ae6c62bf8" />
+</div>
 
-# test coverage
-$ yarn run test:cov
-```
+<!-- **[ CI/CD ]**
 
-## Deployment
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+<img src="https://img.shields.io/badge/Github-181717?style=for-the-badge&logo=github&logoColor=white"/></a></a> <img src="https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white"/></a></a> -->
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ yarn install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+<br>
+<br>
+<br>
